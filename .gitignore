@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+.venv/
+venv/
+env/
+.env
+
+# Model checkpoints & weights (large files)
+models/checkpoints/*.pth
+models/checkpoints/*.ckpt
+models/checkpoints/*.bin
+models/checkpoints/*.safetensors
+
+# Raw audio data (personal voice data, keep local)
+data/raw/
+data/processed/
+
+# Logs
+*.log
+logs/
+runs/
+wandb/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Hugging Face cache
+.cache/
+
+# Keep directory structure
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!models/checkpoints/.gitkeep
