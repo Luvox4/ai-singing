@@ -1,69 +1,75 @@
-# 新电脑初始化
+# New Computer Setup
 
-这份文档只说明一件事：把当前仓库拉到另一台电脑后，怎样最快恢复成可用状态。
+Updated: 2026-03-31
 
-## 前提
+## Windows Workflow
 
-- Windows 10/11
-- 已安装 `Git`
-- 已安装 `Python 3.10.x`
-- 如需 GPU 推理或训练，已装对应 NVIDIA 驱动和 CUDA 运行环境
+This repo now expects a local `uv`-managed `.venv`.
 
-## 推荐步骤
+Install these first:
 
-1. 克隆仓库
+- Git
+- Python 3.10.x
+- `uv`
+- NVIDIA driver and CUDA-capable GPU if you want GPU training
+
+Clone the repo and submodules:
 
 ```powershell
-git clone https://github.com/Luvox4/ai-singing.git
+git clone --recurse-submodules https://github.com/Luvox4/ai-singing.git
 cd ai-singing
 ```
 
-2. 运行初始化脚本
+Run the project setup:
 
 ```powershell
 .\setup.bat
 ```
 
-`setup.bat` 现在会自动做这些事：
+`setup.bat` now does the following:
 
-- 初始化 `external/seed-vc` 子模块
-- 创建 `.venv`
-- 用清华镜像安装依赖
-- 给 `seed-vc` 自动打上当前仓库依赖的兼容补丁
-- 安装本项目附加工具，包括人声分离依赖
-- 自动复制 `.env.example` 为 `.env`
+- creates `.venv` with `uv`
+- syncs the main project dependencies from [uv.lock](/D:/Project/ai-singing/uv.lock)
+- installs filtered `seed-vc` dependencies without overwriting the local torch build
+- applies the Windows torch DLL compatibility fix when needed
+- applies the local `seed-vc` compatibility patch
+- creates `.env` from `.env.example` if missing
 
-3. 编辑 `.env`
-
-至少补上：
+Add your Hugging Face token to `.env`:
 
 ```text
-HUGGING_FACE_HUB_TOKEN=你的 token
+HUGGING_FACE_HUB_TOKEN=hf_your_token_here
 ```
 
-## 初始化完成后怎么用
+## Common Commands
 
-- 启动 Web UI：
+Launch the combined Web UI:
 
 ```powershell
 .\scripts\start_webui.bat
 ```
 
-- 启动歌声转换 Web UI：
+Launch the SVC UI:
 
 ```powershell
 .\scripts\start_svc.bat
 ```
 
-- 使用人声分离：
+Run training:
 
 ```powershell
-.\.venv\Scripts\python.exe .\vocal_separation\download_models.py --preset best --preset balanced --preset fast
-.\.venv\Scripts\python.exe .\vocal_separation\separate.py "D:\你的歌曲.flac" --preset best --device auto
+.\scripts\train.bat
 ```
 
-## 注意
+Run vocal separation manually:
 
-- 不是“只 clone 就能直接运行”，因为模型和 Python 环境本来就不进 Git
-- 现在的目标是“`clone + setup.bat` 后可用”
-- `external/seed-vc` 仍然是子模块，但仓库已经把必须的本地兼容修复自动化了
+```powershell
+uv run --no-sync --cache-dir .uv-cache --python .venv\Scripts\python.exe python .\vocal_separation\download_models.py --preset best
+uv run --no-sync --cache-dir .uv-cache --python .venv\Scripts\python.exe python .\vocal_separation\separate.py .\vocal_separation\input\song.flac --preset best --device cuda
+```
+
+## Notes
+
+- The validated Windows GPU stack in this workspace is `torch 2.7.1+cu128`.
+- `external/seed-vc` is patched locally by the repo tooling; you do not need to edit it by hand.
+- Do not copy `.venv` from another machine. Run `.\setup.bat` on each machine instead.

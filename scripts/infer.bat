@@ -1,41 +1,35 @@
 @echo off
+setlocal
 chcp 65001 >nul
 echo ==========================================
 echo  AI Singing Voice - Inference Script
 echo ==========================================
 echo.
 
-call "%~dp0..\venv\Scripts\activate.bat" 2>nul || call "%~dp0..\.venv\Scripts\activate.bat" 2>nul
-python "%~dp0..\tools\patch_seed_vc.py" || (echo [ERROR] Failed to patch seed-vc & pause & exit /b 1)
+set "REQUIRE_VENV=1"
+call "%~dp0resolve_python.bat" || (pause & exit /b 1)
+uv --version >nul 2>nul || (echo [ERROR] uv not found. Run setup.bat after installing uv. & pause & exit /b 1)
 
-if exist "%~dp0..\.env" (
-    for /f "usebackq tokens=1,* delims==" %%a in ("%~dp0..\.env") do (
+for %%I in ("%~dp0..") do set "REPO_ROOT=%%~fI"
+set "UV_PYTHON=%PYTHON_CMD:"=%"
+
+uv run --no-sync --cache-dir "%REPO_ROOT%\.uv-cache" --python "%UV_PYTHON%" python "%REPO_ROOT%\tools\patch_seed_vc.py" || (echo [ERROR] Failed to patch seed-vc & pause & exit /b 1)
+
+if exist "%REPO_ROOT%\.env" (
+    for /f "usebackq tokens=1,* delims==" %%a in ("%REPO_ROOT%\.env") do (
         if not "%%a"=="" if not "%%a:~0,1%"=="#" set "%%a=%%b"
     )
 )
 
-:: --- Configuration ---
-:: 要转换的歌声文件（源音频）
 set SOURCE=../../data/source_song.wav
-
-:: 你的声音参考文件（目标声音）
 set TARGET=../../data/raw/my_voice_sample.wav
-
-:: 输出目录
 set OUTPUT=../../data/processed
-
-:: 可选：如果已微调，设置你的检查点路径
-:: set CHECKPOINT=../../models/checkpoints/my_voice_model/model_final.pth
-:: set CONFIG=../../configs/presets/config_dit_mel_seed_uvit_whisper_base_f0_44k.yml
 set CHECKPOINT=
 set CONFIG=
-
-:: 歌声转换参数
 set DIFFUSION_STEPS=30
 set PITCH_SHIFT=0
 
-:: --- Run Inference ---
-cd "%~dp0..\external\seed-vc"
+cd /d "%REPO_ROOT%\external\seed-vc"
 
 if "%SOURCE%"=="" (
     echo [ERROR] Please set SOURCE in this script.
@@ -47,7 +41,7 @@ if "%TARGET%"=="" (
 )
 
 if "%CHECKPOINT%"=="" (
-    python inference.py ^
+    uv run --no-sync --cache-dir "%REPO_ROOT%\.uv-cache" --python "%UV_PYTHON%" python inference.py ^
         --source %SOURCE% ^
         --target %TARGET% ^
         --output %OUTPUT% ^
@@ -55,7 +49,7 @@ if "%CHECKPOINT%"=="" (
         --f0-condition True ^
         --semi-tone-shift %PITCH_SHIFT%
 ) else (
-    python inference.py ^
+    uv run --no-sync --cache-dir "%REPO_ROOT%\.uv-cache" --python "%UV_PYTHON%" python inference.py ^
         --source %SOURCE% ^
         --target %TARGET% ^
         --output %OUTPUT% ^

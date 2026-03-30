@@ -1,27 +1,33 @@
 @echo off
+setlocal
 chcp 65001 >nul
 echo [INFO] Starting Singing Voice Conversion Web UI...
 
-call "%~dp0..\venv\Scripts\activate.bat" 2>nul || call "%~dp0..\.venv\Scripts\activate.bat" 2>nul
-python "%~dp0..\tools\patch_seed_vc.py" || (echo [ERROR] Failed to patch seed-vc & pause & exit /b 1)
+set "REQUIRE_VENV=1"
+call "%~dp0resolve_python.bat" || (pause & exit /b 1)
+uv --version >nul 2>nul || (echo [ERROR] uv not found. Run setup.bat after installing uv. & pause & exit /b 1)
 
-if exist "%~dp0..\.env" (
-    for /f "usebackq tokens=1,* delims==" %%a in ("%~dp0..\.env") do (
+for %%I in ("%~dp0..") do set "REPO_ROOT=%%~fI"
+set "UV_PYTHON=%PYTHON_CMD:"=%"
+
+uv run --no-sync --cache-dir "%REPO_ROOT%\.uv-cache" --python "%UV_PYTHON%" python "%REPO_ROOT%\tools\patch_seed_vc.py" || (echo [ERROR] Failed to patch seed-vc & pause & exit /b 1)
+
+if exist "%REPO_ROOT%\.env" (
+    for /f "usebackq tokens=1,* delims==" %%a in ("%REPO_ROOT%\.env") do (
         if not "%%a"=="" if not "%%a:~0,1%"=="#" set "%%a=%%b"
     )
 )
 
-:: Optional: custom checkpoint
 set CHECKPOINT=
 set CONFIG=
 
-cd "%~dp0..\external\seed-vc"
+cd /d "%REPO_ROOT%\external\seed-vc"
 echo [INFO] Open browser at: http://localhost:7860
 
 if "%CHECKPOINT%"=="" (
-    python app_svc.py
+    uv run --no-sync --cache-dir "%REPO_ROOT%\.uv-cache" --python "%UV_PYTHON%" python app_svc.py
 ) else (
-    python app_svc.py --checkpoint %CHECKPOINT% --config %CONFIG%
+    uv run --no-sync --cache-dir "%REPO_ROOT%\.uv-cache" --python "%UV_PYTHON%" python app_svc.py --checkpoint %CHECKPOINT% --config %CONFIG%
 )
 
 pause

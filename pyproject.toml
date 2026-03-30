@@ -1,0 +1,21 @@
+[project]
+name = "ai-singing"
+version = "0.1.0"
+description = "Local uv-managed environment for AI singing training and vocal separation"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "demucs==4.0.1",
+    "imageio-ffmpeg==0.6.0",
+    "numpy>=1.26,<2",
+    "python-dotenv>=1.2.2",
+    "torch==2.7.1+cu128",
+    "torchaudio==2.7.1+cu128",
+    "torchvision==0.22.1+cu128",
+]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+
+[[tool.uv.index]]
+url = "https://download.pytorch.org/whl/cu128"
+default = true

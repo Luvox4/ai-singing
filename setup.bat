@@ -1,15 +1,19 @@
 @echo off
+setlocal
 chcp 65001 >nul
 echo ==========================================
 echo  AI Singing Voice - Setup Script (Windows)
 echo ==========================================
 echo.
 
-:: Check Python version
-python --version 2>nul || (echo [ERROR] Python not found. Install Python 3.10 from https://python.org && pause && exit /b 1)
+call "%~dp0scripts\resolve_python.bat" || (pause && exit /b 1)
+set "BOOTSTRAP_PYTHON=%PYTHON_CMD:"=%"
+"%BOOTSTRAP_PYTHON%" --version 2>nul || (echo [ERROR] Python 3.10 not found. Install Python 3.10 and reopen the terminal. && pause && exit /b 1)
 echo [OK] Python found
 
-:: Ensure submodule is available
+uv --version >nul 2>nul || (echo [ERROR] uv not found. Install uv and reopen the terminal. && pause && exit /b 1)
+echo [OK] uv found
+
 git --version >nul 2>nul
 if errorlevel 1 (
     if not exist "external\seed-vc\requirements.txt" (
@@ -22,39 +26,34 @@ if errorlevel 1 (
     git submodule update --init --recursive || (echo [ERROR] Failed to initialize git submodules && pause && exit /b 1)
 )
 
-:: Create virtual environment
 if not exist ".venv" (
-    echo [INFO] Creating virtual environment...
-    python -m venv .venv
+    echo [INFO] Creating uv virtual environment...
+    uv venv --python "%BOOTSTRAP_PYTHON%" .venv || (echo [ERROR] Failed to create .venv && pause && exit /b 1)
 )
 echo [OK] Virtual environment ready
 
-:: Activate venv
-call .venv\Scripts\activate.bat
+set "UV_PYTHON=%~dp0.venv\Scripts\python.exe"
+if not exist "%UV_PYTHON%" (
+    echo [ERROR] Virtual environment python not found: %UV_PYTHON%
+    pause
+    exit /b 1
+)
 
-:: Use Tsinghua mirror for Python packages
-set PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+echo [INFO] Syncing project dependencies from uv.lock...
+uv sync --frozen --no-install-project --python "%UV_PYTHON%" --cache-dir .uv-cache --system-certs || (echo [ERROR] uv sync failed && pause && exit /b 1)
 
-:: Apply local compatibility patches to seed-vc
-python tools\patch_seed_vc.py || (echo [ERROR] Failed to patch external\seed-vc && pause && exit /b 1)
+echo [INFO] Preparing filtered seed-vc requirements...
+"%UV_PYTHON%" tools\prepare_seed_vc_requirements.py || (echo [ERROR] Failed to prepare seed-vc requirements && pause && exit /b 1)
 
-:: Upgrade pip
-python -m pip install --upgrade pip -i %PIP_INDEX_URL%
+echo [INFO] Installing seed-vc dependencies with uv...
+uv pip install --python "%UV_PYTHON%" --cache-dir .uv-cache --system-certs -r .tmp\seed-vc.requirements.filtered.txt --excludes .tmp\seed-vc.exclude.txt webrtcvad-wheels || (echo [ERROR] Failed to install seed-vc dependencies && pause && exit /b 1)
 
-:: Install PyTorch with CUDA (CUDA 12.1 compatible)
-echo [INFO] Installing PyTorch with CUDA support...
-pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121 --extra-index-url %PIP_INDEX_URL%
+echo [INFO] Applying Windows torch compatibility fix...
+"%UV_PYTHON%" tools\fix_torch_windows.py || (echo [ERROR] Failed to apply torch DLL fix && pause && exit /b 1)
 
-:: Install seed-vc dependencies
-echo [INFO] Installing seed-vc dependencies...
-cd external\seed-vc
-pip install -r requirements.txt -i %PIP_INDEX_URL%
-cd ..\..
+echo [INFO] Applying local compatibility patches to seed-vc...
+"%UV_PYTHON%" tools\patch_seed_vc.py || (echo [ERROR] Failed to patch external\seed-vc && pause && exit /b 1)
 
-:: Install project tools
-pip install -r requirements-local.txt -i %PIP_INDEX_URL%
-
-:: Copy env file
 if not exist ".env" (
     copy .env.example .env
     echo [INFO] .env file created. Edit it to add your HuggingFace token.
@@ -65,7 +64,8 @@ echo ==========================================
 echo  Setup Complete!
 echo  Next steps:
 echo  1. Edit .env and add your HuggingFace token
-echo  2. Read GUIDE.md for full instructions
+echo  2. Read docs\new_computer_setup.md for the current workflow
 echo  3. Run: scripts\start_webui.bat to launch web UI
 echo ==========================================
+endlocal
 pause
