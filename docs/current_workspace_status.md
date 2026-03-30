@@ -113,10 +113,11 @@ Manual vocal separation:
 uv run --no-sync --cache-dir .uv-cache --python .venv\Scripts\python.exe python .\vocal_separation\separate.py .\vocal_separation\input\song.flac --preset best --device cuda
 ```
 
-## Local-Only Files Not Included In This Cleanup
+## Root File Cleanup
 
-These root files are still local and were intentionally left out of the repo cleanup:
+The previous local scratch files in the repo root were cleaned up.
 
-- [README.md](/D:/Project/ai-singing/README.md)
-- [main.py](/D:/Project/ai-singing/main.py)
+Current root-level extras:
+
 - [.python-version](/D:/Project/ai-singing/.python-version)
+  Now kept intentionally as the local Python version hint for the project.

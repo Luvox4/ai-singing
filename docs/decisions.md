@@ -153,4 +153,4 @@ Roles:
 - Do not assume remote/server scripts still exist.
 - Do not assume `setup.bat` leaves `seed-vc` permanently patched.
 - Do not assume the submodule revision changed just because local patch tooling exists.
-- Do not assume root-level local files such as [README.md](/D:/Project/ai-singing/README.md), [main.py](/D:/Project/ai-singing/main.py), or [.python-version](/D:/Project/ai-singing/.python-version) are part of the tracked project state.
+- Do not assume any future untracked scratch files in the repo root are part of the tracked project state unless they are committed and referenced by the docs.
