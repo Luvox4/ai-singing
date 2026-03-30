@@ -51,8 +51,7 @@ uv pip install --python "%UV_PYTHON%" --cache-dir .uv-cache --system-certs -r .t
 echo [INFO] Applying Windows torch compatibility fix...
 "%UV_PYTHON%" tools\fix_torch_windows.py || (echo [ERROR] Failed to apply torch DLL fix && pause && exit /b 1)
 
-echo [INFO] Applying local compatibility patches to seed-vc...
-"%UV_PYTHON%" tools\patch_seed_vc.py || (echo [ERROR] Failed to patch external\seed-vc && pause && exit /b 1)
+echo [INFO] Local seed-vc compatibility patch will be applied automatically when you launch training or the Web UI.
 
 if not exist ".env" (
     copy .env.example .env

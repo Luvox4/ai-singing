@@ -32,8 +32,13 @@ Run the project setup:
 - syncs the main project dependencies from [uv.lock](/D:/Project/ai-singing/uv.lock)
 - installs filtered `seed-vc` dependencies without overwriting the local torch build
 - applies the Windows torch DLL compatibility fix when needed
-- applies the local `seed-vc` compatibility patch
 - creates `.env` from `.env.example` if missing
+
+Compatibility note:
+
+- local `seed-vc` runtime patches are applied when you launch training or the Web UI
+- those patches are restored afterwards, so the submodule is not meant to stay permanently modified
+- the current submodule base revision is `51383ef`
 
 Add your Hugging Face token to `.env`:
 

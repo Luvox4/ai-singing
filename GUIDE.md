@@ -26,7 +26,7 @@ cd ai-singing
 .\setup.bat
 ```
 
-`setup.bat` now builds the local `.venv` with `uv`, syncs from [uv.lock](/D:/Project/ai-singing/uv.lock), installs the filtered `seed-vc` dependencies, applies the Windows torch compatibility fix, and patches `seed-vc`.
+`setup.bat` now builds the local `.venv` with `uv`, syncs from [uv.lock](/D:/Project/ai-singing/uv.lock), installs the filtered `seed-vc` dependencies, and applies the Windows torch compatibility fix.
 
 If `.env` is missing, setup creates it from `.env.example`. Add your Hugging Face token:
 
@@ -71,7 +71,21 @@ uv run --no-sync --cache-dir .uv-cache --python .venv\Scripts\python.exe python 
 
 - Put training audio under `data/raw/`
 - The validated GPU stack in this workspace is `torch 2.7.1+cu128`
+- The current `external/seed-vc` base commit is `51383ef` (`fixe dataloader build bug when fine-tuning v1 model`)
 - `external/seed-vc` compatibility fixes are applied locally by [tools/patch_seed_vc.py](/D:/Project/ai-singing/tools/patch_seed_vc.py)
+- Local launch scripts restore those patched files afterwards through [tools/restore_seed_vc.py](/D:/Project/ai-singing/tools/restore_seed_vc.py), so the submodule does not need to stay permanently modified
+
+## Compatibility Notes
+
+- The local compatibility patch only changes runtime dtype handling in `seed-vc`
+- The patch targets:
+  - `app.py`
+  - `app_svc.py`
+  - `seed_vc_wrapper.py`
+- Purpose:
+  - fall back to `float32` when running on CPU paths
+  - keep the validated local Windows workflow stable with the current `uv` environment
+- The patch is not a version fork; it is applied on top of the checked-out `51383ef` submodule revision and then restored
 
 ## Related Docs
 

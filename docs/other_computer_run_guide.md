@@ -67,5 +67,6 @@ uv run --no-sync --cache-dir .uv-cache --python .venv\Scripts\python.exe python 
 
 - The project now uses `uv` as the primary dependency manager on Windows.
 - The Windows setup installs the local torch runtime from [uv.lock](/D:/Project/ai-singing/uv.lock).
-- `seed-vc` compatibility patches are applied by repo tooling. They are not meant to be edited manually.
+- `seed-vc` compatibility patches are applied by repo tooling at runtime and restored afterwards. They are not meant to be edited manually.
+- The current `seed-vc` submodule base revision is `51383ef`.
 - If GPU training fails on a new Windows machine, verify the NVIDIA driver first, then rerun `.\setup.bat`.

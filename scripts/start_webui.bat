@@ -22,4 +22,9 @@ cd /d "%REPO_ROOT%\external\seed-vc"
 echo [INFO] Open browser at: http://localhost:7860
 uv run --no-sync --cache-dir "%REPO_ROOT%\.uv-cache" --python "%UV_PYTHON%" python app.py
 
+set "APP_EXIT=%ERRORLEVEL%"
+uv run --no-sync --cache-dir "%REPO_ROOT%\.uv-cache" --python "%UV_PYTHON%" python "%REPO_ROOT%\tools\restore_seed_vc.py"
+if errorlevel 1 echo [WARN] Failed to restore seed-vc files to a clean state.
+
 pause
+exit /b %APP_EXIT%

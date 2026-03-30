@@ -21,7 +21,7 @@ The current setup was validated on:
 - [uv.lock](/D:/Project/ai-singing/uv.lock)
   Added a locked dependency set for reproducible `uv sync`.
 - [setup.bat](/D:/Project/ai-singing/setup.bat)
-  Reworked to build the environment with `uv`, sync from `uv.lock`, install filtered `seed-vc` dependencies, apply the Windows torch DLL fix, and patch `seed-vc`.
+  Reworked to build the environment with `uv`, sync from `uv.lock`, install filtered `seed-vc` dependencies, and apply the Windows torch DLL fix.
 - [scripts/resolve_python.bat](/D:/Project/ai-singing/scripts/resolve_python.bat)
   Now supports both bootstrap mode and strict project-venv mode.
 - [scripts/start_webui.bat](/D:/Project/ai-singing/scripts/start_webui.bat)
@@ -41,13 +41,28 @@ The current setup was validated on:
 
 ## Runtime Patch Strategy
 
-`external/seed-vc` still needs a small compatibility patch for CPU-safe dtype handling.
+The `external/seed-vc` submodule is currently pinned to commit `51383ef`:
 
-That patch is carried by:
+- `fixe dataloader build bug when fine-tuning v1 model`
+
+That version still needs a small local compatibility patch for CPU-safe dtype handling in the Windows workflow.
+
+The patch is carried by:
 
 - [tools/patch_seed_vc.py](/D:/Project/ai-singing/tools/patch_seed_vc.py)
+- [tools/restore_seed_vc.py](/D:/Project/ai-singing/tools/restore_seed_vc.py)
 
-The main repo commit does not need to carry edited submodule files. The patch is applied by setup and the Windows launch scripts.
+The main repo does not carry a forked `seed-vc` revision. Instead:
+
+- setup installs dependencies only
+- Windows launch scripts apply the compatibility patch before running `seed-vc`
+- Windows launch scripts restore the original `seed-vc` files afterwards
+
+Patched files:
+
+- [app.py](/D:/Project/ai-singing/external/seed-vc/app.py)
+- [app_svc.py](/D:/Project/ai-singing/external/seed-vc/app_svc.py)
+- [seed_vc_wrapper.py](/D:/Project/ai-singing/external/seed-vc/seed_vc_wrapper.py)
 
 ## Verified State
 
