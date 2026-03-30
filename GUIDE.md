@@ -92,3 +92,4 @@ uv run --no-sync --cache-dir .uv-cache --python .venv\Scripts\python.exe python 
 - [docs/new_computer_setup.md](/D:/Project/ai-singing/docs/new_computer_setup.md)
 - [docs/other_computer_run_guide.md](/D:/Project/ai-singing/docs/other_computer_run_guide.md)
 - [docs/current_workspace_status.md](/D:/Project/ai-singing/docs/current_workspace_status.md)
+- [docs/decisions.md](/D:/Project/ai-singing/docs/decisions.md)

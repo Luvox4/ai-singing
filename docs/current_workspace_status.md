@@ -6,6 +6,8 @@ Updated: 2026-03-31
 
 This repo now uses a local `uv`-managed `.venv` as the primary Windows workflow.
 
+For the longer-lived architectural decisions behind that workflow, see [docs/decisions.md](/D:/Project/ai-singing/docs/decisions.md).
+
 The current setup was validated on:
 
 - Windows
