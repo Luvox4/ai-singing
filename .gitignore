@@ -34,6 +34,7 @@ wandb/
 # IDE
 .idea/
 .vscode/
+.claude/
 *.swp
 *.swo
 
@@ -43,6 +44,17 @@ Thumbs.db
 
 # Hugging Face cache
 .cache/
+git-metadata.tar.gz
+
+# Vocal separation workspace
+vocal_separation/input/*
+vocal_separation/output/*
+vocal_separation/models/*
+vocal_separation/bin/*
+!vocal_separation/input/.gitkeep
+!vocal_separation/output/.gitkeep
+!vocal_separation/models/.gitkeep
+!vocal_separation/bin/.gitkeep
 
 # Keep directory structure
 !data/raw/.gitkeep

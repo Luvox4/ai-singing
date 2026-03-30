@@ -5,10 +5,17 @@
 # ==========================================
 set -e
 
+export PATH="$HOME/.local/bin:$PATH"
+
 source .venv/bin/activate 2>/dev/null || source venv/bin/activate
+python tools/patch_seed_vc.py
 
 # Load env variables
-[ -f ".env" ] && export $(cat .env | grep -v '^#' | xargs)
+if [ -f ".env" ]; then
+    set -a
+    . ./.env
+    set +a
+fi
 
 # ============ Configuration ============
 # 模型配置（歌声转换推荐此配置）
